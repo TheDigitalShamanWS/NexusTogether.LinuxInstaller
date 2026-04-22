@@ -169,6 +169,26 @@ install_database() {
         print_status "No world data import needed (repository was already up to date)"
     fi
     
+    # Update server host in auth database
+    print_status "Updating server host in auth database..."
+    
+    # Detect public IP
+    local server_host=$(get_public_ip)
+    
+    if [[ -n "$server_host" ]]; then
+        print_status "Using public IP for server host: $server_host"
+    else
+        print_warning "Could not detect public IP, using localhost"
+        server_host="localhost"
+    fi
+    
+    # Update the server table with the correct host
+    if mysql -u "$DB_USER" -p"$DB_PASS" -h "$DB_HOST" "$DB_NAME_AUTH" -e "UPDATE server SET host = '$server_host' WHERE id = 1;" 2>/dev/null; then
+        print_status "Server host updated to: $server_host"
+    else
+        print_warning "Failed to update server host in database (may not exist yet or table structure different)"
+    fi
+    
     print_status "Database setup completed successfully"
     return 0
 }
