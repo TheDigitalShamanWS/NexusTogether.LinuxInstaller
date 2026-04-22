@@ -11,12 +11,13 @@ cli_install() {
         echo "Usage: nexusforever install <component>"
         echo ""
         echo "Available components:"
-        echo "  all         Complete installation (core + db + broker + configs + services + firewall)"
+        echo "  all         Complete installation (core + db + broker + configs + client-data + services + firewall)"
         echo "  server      Install Server Core (includes patcher)"
         echo "  mariadb     Install MariaDB Server"
         echo "  database    Install Database"
         echo "  broker      Install Message Broker"
         echo "  configs     Install Configuration Files"
+        echo "  client-data Install Client Data Files (map and tbl)"
         echo "  services    Install Services (Systemd/Screen)"
         echo "  firewall    Install Firewall"
         echo ""
@@ -51,6 +52,9 @@ cli_install() {
             ;;
         "configs")
             install_configs
+            ;;
+        "client-data")
+            install_client_data
             ;;
         "services")
             install_services

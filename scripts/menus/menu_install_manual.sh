@@ -9,21 +9,22 @@ menu_install_manual() {
         
         print_menu_box "🔧 SYSTEM & CORE"
         print_menu_option "1" "📦" "Install System Requirements"
-        print_menu_option "2" "⚙️" "Install Server Core (includes patcher)"
+        print_menu_option "2" "⚙️" "Install Server Core"
         print_menu_option "3" "📋" "Install Configuration Files"
+        print_menu_option "4" "🎮" "Install Client Data Files"
         print_menu_footer
         print_menu_separator
         
         print_menu_box "🗄️ DATABASE & SERVICES"
-        print_menu_option "4" "🗄️" "Install MariaDB Server"
-        print_menu_option "5" "🗄️" "Install Database"
-        print_menu_option "6" "📨" "Install Message Broker"
-        print_menu_option "7" "🚀" "Install Services"
+        print_menu_option "5" "🗄️" "Install MariaDB Server"
+        print_menu_option "6" "🗄️" "Install Database"
+        print_menu_option "7" "📨" "Install Message Broker"
+        print_menu_option "8" "🚀" "Install Services"
         print_menu_footer
         print_menu_separator
         
         print_menu_box "🔥 NETWORK & SECURITY"
-        print_menu_option "8" "🔥" "Install Firewall"
+        print_menu_option "9" "🔥" "Install Firewall"
         print_menu_footer
         print_menu_separator
         
@@ -32,7 +33,7 @@ menu_install_manual() {
         print_menu_option "q" "🚪" "Quit"
         print_menu_footer
         print_menu_separator
-        read -p "Enter your choice [1-8, b, q]: " choice
+        read -p "Enter your choice [1-9, b, q]: " choice
         
         case $choice in
             1)
@@ -48,22 +49,26 @@ menu_install_manual() {
                 read -p "Press Enter to continue..."
                 ;;
             4)
-                install_mariadb
+                install_client_data
                 read -p "Press Enter to continue..."
                 ;;
             5)
-                install_database
+                install_mariadb
                 read -p "Press Enter to continue..."
                 ;;
             6)
-                install_broker
+                install_database
                 read -p "Press Enter to continue..."
                 ;;
             7)
-                install_services
+                install_broker
                 read -p "Press Enter to continue..."
                 ;;
             8)
+                install_services
+                read -p "Press Enter to continue..."
+                ;;
+            9)
                 install_firewall
                 read -p "Press Enter to continue..."
                 ;;
