@@ -14,12 +14,12 @@ manage_stop_service() {
             IFS=':' read -r service_key service_name display_name <<< "$service_def"
             if [[ "$SERVICE_MODE" == "screen" ]]; then
                 # Stop screen session
-                if screen -list | grep -q "nexus_$service_key"; then
-                    screen -S "nexus_$service_key" -p 0 -X stuff "^C"  # Send Ctrl+C
+                if screen -list | grep -q "nexus-$service_key"; then
+                    screen -S "nexus-$service_key" -p 0 -X stuff "^C"  # Send Ctrl+C
                     sleep 2
-                    screen -S "nexus_$service_key" -p 0 -X stuff "exit^M"  # Send exit
+                    screen -S "nexus-$service_key" -p 0 -X stuff "exit^M"  # Send exit
                     sleep 1
-                    screen -S "nexus_$service_key" -X quit  # Force quit screen
+                    screen -S "nexus-$service_key" -X quit  # Force quit screen
                     print_status "$display_name screen session stopped"
                     ((stopped_count++))
                 else
@@ -43,12 +43,12 @@ manage_stop_service() {
             IFS=':' read -r service_key service_name display_name <<< "$service_def"
             if [[ "$service_key" == "$service_choice" ]]; then
                 if [[ "$SERVICE_MODE" == "screen" ]]; then
-                    if screen -list | grep -q "nexus_$service_key"; then
-                        screen -S "nexus_$service_key" -p 0 -X stuff "^C"
+                    if screen -list | grep -q "nexus-$service_key"; then
+                        screen -S "nexus-$service_key" -p 0 -X stuff "^C"
                         sleep 2
-                        screen -S "nexus_$service_key" -p 0 -X stuff "exit^M"
+                        screen -S "nexus-$service_key" -p 0 -X stuff "exit^M"
                         sleep 1
-                        screen -S "nexus_$service_key" -X quit
+                        screen -S "nexus-$service_key" -X quit
                         print_status "$display_name screen session stopped"
                     else
                         print_warning "$display_name screen session not found"
