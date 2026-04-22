@@ -30,7 +30,6 @@ manage_start_service() {
                     screen -dmS "nexus-$service_key" "$service_script"
                     
                     # Check if service started successfully
-                    sleep 2
                     if screen -list | grep -q "nexus-$service_key"; then
                         print_status "$display_name started successfully"
                         ((started_count++))
@@ -76,7 +75,6 @@ manage_start_service() {
                         screen -dmS "nexus-$service_key" "$service_script"
                         
                         # Check if service started successfully
-                        sleep 2
                         if screen -list | grep -q "nexus-$service_key"; then
                             print_status "$display_name started successfully"
                         else
