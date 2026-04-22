@@ -63,12 +63,41 @@ install_requirements() {
     # Check if screen is installed
     if ! command -v screen &> /dev/null; then
         print_status "Screen is not installed. Installing screen..."
+        sudo apt update
         sudo apt install -y screen
         
         if command -v screen &> /dev/null; then
             print_status "Screen installed successfully"
         else
             print_error "Failed to install screen"
+            return 1
+        fi
+    fi
+    
+    # Check if crontab is installed (needed for auto-startup)
+    if ! command -v crontab &> /dev/null; then
+        print_status "Crontab is not installed. Installing cron..."
+        sudo apt update
+        sudo apt install -y cron
+        
+        if command -v crontab &> /dev/null; then
+            print_status "Cron installed successfully"
+        else
+            print_error "Failed to install cron"
+            return 1
+        fi
+    fi
+    
+    # Check if ufw is installed (for firewall management)
+    if ! command -v ufw &> /dev/null; then
+        print_status "UFW is not installed. Installing UFW firewall..."
+        sudo apt update
+        sudo apt install -y ufw
+        
+        if command -v ufw &> /dev/null; then
+            print_status "UFW installed successfully"
+        else
+            print_error "Failed to install UFW"
             return 1
         fi
     fi

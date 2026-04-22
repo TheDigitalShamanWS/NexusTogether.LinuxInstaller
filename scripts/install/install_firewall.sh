@@ -13,9 +13,16 @@ install_firewall() {
     
     # Check if UFW is installed
     if ! command -v ufw &> /dev/null; then
-        print_error "UFW is not available for firewall management"
-        print_status "Please install UFW: sudo apt install ufw"
-        return 1
+        print_status "UFW is not installed. Installing UFW..."
+        sudo apt update
+        sudo apt install -y ufw
+        
+        if command -v ufw &> /dev/null; then
+            print_status "UFW installed successfully"
+        else
+            print_error "Failed to install UFW"
+            return 1
+        fi
     fi
     
     # Enable UFW if not active
