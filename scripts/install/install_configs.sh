@@ -291,7 +291,7 @@ EOF
 update_patcher_config() {
     local key="$1"
     local value="$2"
-    local config_file="$SCRIPT_DIR/../configs/patcher.conf"
+    local config_file="$MANAGER_DIR/configs/patcher.conf"
     
     if [[ ! -f "$config_file" ]]; then
         print_error "Patcher config file not found: $config_file"
