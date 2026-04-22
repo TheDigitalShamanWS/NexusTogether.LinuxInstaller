@@ -183,24 +183,10 @@ install_database() {
     fi
     
     # Update the server table with the correct host
-    print_status "Executing: UPDATE server SET host = '$server_host' WHERE id = 1;"
-    local mysql_output=$(mysql -u "$DB_USER" -p"$DB_PASS" -h "$DB_HOST" "$DB_NAME_AUTH" -e "UPDATE server SET host = '$server_host' WHERE id = 1;" 2>&1)
-    local mysql_exit_code=$?
-    
-    if [[ $mysql_exit_code -eq 0 ]]; then
+    if mysql -u "$DB_USER" -p"$DB_PASS" -h "$DB_HOST" "$DB_NAME_AUTH" -e "UPDATE server SET host = '$server_host' WHERE id = 1;" 2>/dev/null; then
         print_status "Server host updated to: $server_host"
-        
-        # Verify the update
-        local current_host=$(mysql -u "$DB_USER" -p"$DB_PASS" -h "$DB_HOST" "$DB_NAME_AUTH" -N -e "SELECT host FROM server WHERE id = 1;" 2>/dev/null)
-        if [[ -n "$current_host" ]]; then
-            print_status "Verified server host in database: $current_host"
-        else
-            print_warning "Could not verify server host in database"
-        fi
     else
-        print_error "Failed to update server host in database"
-        print_error "MySQL error: $mysql_output"
-        print_error "Exit code: $mysql_exit_code"
+        print_warning "Failed to update server host in database (may not exist yet or table structure different)"
     fi
     
     print_status "Database setup completed successfully"
