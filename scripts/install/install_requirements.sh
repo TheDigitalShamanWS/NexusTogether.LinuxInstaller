@@ -25,9 +25,28 @@ install_requirements() {
         print_status ".NET is not installed. Installing .NET 10.0 SDK..."
         print_status "This may take a few minutes..."
         
-        # Install .NET SDK directly from Ubuntu repositories
-        sudo apt update
-        sudo apt install -y dotnet-sdk-10.0
+        # Disable .NET telemetry
+        export DOTNET_CLI_TELEMETRY_OPTOUT=1
+        export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+        
+        # Install .NET 10.0 SDK using Microsoft's official script
+        curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version latest --channel 10.0
+        
+        # Add .NET to PATH and disable telemetry permanently
+        if ! grep -q 'export PATH=$PATH:$HOME/.dotnet' "/home/$SERVICE_USER/.bashrc"; then
+            echo 'export PATH=$PATH:$HOME/.dotnet' >> "/home/$SERVICE_USER/.bashrc"
+        fi
+        if ! grep -q 'export DOTNET_CLI_TELEMETRY_OPTOUT=1' "/home/$SERVICE_USER/.bashrc"; then
+            echo 'export DOTNET_CLI_TELEMETRY_OPTOUT=1' >> "/home/$SERVICE_USER/.bashrc"
+        fi
+        if ! grep -q 'export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1' "/home/$SERVICE_USER/.bashrc"; then
+            echo 'export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1' >> "/home/$SERVICE_USER/.bashrc"
+        fi
+        
+        # Set up environment for current session
+        export PATH=$PATH:$HOME/.dotnet
+        export DOTNET_CLI_TELEMETRY_OPTOUT=1
+        export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
         
         if command -v dotnet &> /dev/null; then
             print_status ".NET 10.0 SDK installed successfully"
