@@ -74,7 +74,7 @@ install_database() {
     
     # Step 2: Verify dotnet-ef tool is available (installed in requirements)
     print_status "Verifying dotnet-ef tool..."
-    if ! sudo -u "$SERVICE_USER" bash -c 'export PATH=$HOME/.dotnet:$HOME/.dotnet/tools:$PATH && export DOTNET_ROOT=$HOME/.dotnet && dotnet tool list | grep -q dotnet-ef' &> /dev/null; then
+    if ! sudo -u "$SERVICE_USER" bash -c 'export PATH=$HOME/.dotnet:$HOME/.dotnet/tools:$PATH && export DOTNET_ROOT=$HOME/.dotnet && dotnet tool run dotnet-ef --version' &> /dev/null; then
         print_error "dotnet-ef tool not found. Please run requirements installation first."
         return 1
     fi
