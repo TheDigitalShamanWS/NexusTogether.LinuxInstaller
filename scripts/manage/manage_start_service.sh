@@ -44,7 +44,7 @@ manage_start_service() {
                 export TERM=vt100
                 if ! pgrep -f "$service_name" > /dev/null; then
                     cd "$service_name"
-                    dotnet run &
+                    sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && dotnet run" &
                     cd ..
                     print_status "$display_name started"
                     ((started_count++))
@@ -88,7 +88,7 @@ manage_start_service() {
                     export TERM=vt100
                     if ! pgrep -f "$service_name" > /dev/null; then
                         cd "$service_name"
-                        dotnet run &
+                        sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && dotnet run" &
                         cd ..
                         print_status "$display_name started"
                     else

@@ -132,14 +132,14 @@ install_server() {
         cd "$PATCHER_DIR"
         
         # Check if .NET 10 SDK is available
-        if ! command -v dotnet &> /dev/null; then
+        if ! sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet && command -v dotnet' &> /dev/null; then
             print_error ".NET SDK not found. Please install .NET 10.0 SDK first."
             return 1
         fi
         
-        local dotnet_version=$(dotnet --version 2>/dev/null | grep -o '^10\.[0-9]\+' | head -1)
+        local dotnet_version=$(sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet && dotnet --version' 2>/dev/null | grep -o '^10\.[0-9]\+' | head -1)
         if [[ -z "$dotnet_version" ]]; then
-            print_error ".NET 10.0 SDK not found. Current version: $(dotnet --version 2>/dev/null || echo 'unknown')"
+            print_error ".NET 10.0 SDK not found. Current version: $(sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet && dotnet --version' 2>/dev/null || echo 'unknown')"
             return 1
         fi
         
@@ -182,22 +182,22 @@ install_server() {
         
         # Clean obj directories to fix target framework issues
         print_status "Cleaning previous build artifacts..."
-        if ! sudo dotnet clean "$solution_file"; then
+        if ! sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$PATCHER_DIR' && dotnet clean '$solution_file'"; then
             print_warning "Clean failed, continuing anyway..."
         fi
         
         # Restore dependencies first (required for net10.0 targets)
         print_status "Restoring NuGet packages..."
-        if ! sudo dotnet restore "$solution_file"; then
+        if ! sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$PATCHER_DIR' && dotnet restore '$solution_file'"; then
             print_error "Failed to restore NuGet packages"
             return 1
         fi
         
         # Build the solution (now targeting net10.0)
         if [[ "$CONFIG_MODE" == "Release" ]]; then
-            build_cmd="sudo dotnet publish \"$solution_file\" -c $CONFIG_MODE --framework $FRAMEWORK_VERSION"
+            build_cmd="sudo -u \"$SERVICE_USER\" bash -c \"export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$PATCHER_DIR' && dotnet publish \"$solution_file\" -c $CONFIG_MODE --framework $FRAMEWORK_VERSION\""
         else
-            build_cmd="sudo dotnet build \"$solution_file\" -c $CONFIG_MODE --framework $FRAMEWORK_VERSION"
+            build_cmd="sudo -u \"$SERVICE_USER\" bash -c \"export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$PATCHER_DIR' && dotnet build \"$solution_file\" -c $CONFIG_MODE --framework $FRAMEWORK_VERSION\""
         fi
         
         if ! eval "$build_cmd"; then
@@ -238,7 +238,7 @@ install_server() {
     fi
     
     print_status "Building NexusForever server in $CONFIG_MODE mode..."
-    if sudo dotnet build NexusForever.slnx -c "$CONFIG_MODE" --framework "$FRAMEWORK_VERSION"; then
+    if sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$SERVER_DIR/Source' && dotnet build NexusForever.slnx -c '$CONFIG_MODE' --framework '$FRAMEWORK_VERSION'"; then
         print_status "Server built successfully in $CONFIG_MODE mode"
         print_status "Framework: $FRAMEWORK_VERSION"
     else

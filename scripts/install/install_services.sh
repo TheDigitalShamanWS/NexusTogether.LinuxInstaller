@@ -34,12 +34,12 @@ install_services() {
             
             # Determine service path and working directory
             local service_working_dir="$SERVER_DIR"
-            local service_exec_cmd="/usr/bin/dotnet ${service_name}.dll"
+            local service_exec_cmd="/home/${SERVICE_USER}/.dotnet/dotnet ${service_name}.dll"
             
             # Special handling for patcher service
             if [[ "$service_key" == "patcher" ]]; then
                 service_working_dir="$PATCHER_DIR/Source/Nexus.Patch.Server/bin/$CONFIG_MODE/$FRAMEWORK_VERSION"
-                service_exec_cmd="/usr/bin/dotnet ${service_name}.dll"
+                service_exec_cmd="/home/${SERVICE_USER}/.dotnet/dotnet ${service_name}.dll"
             fi
             
             # Create/update service file
@@ -53,6 +53,9 @@ Type=simple
 User=${SERVICE_USER}
 Group=${SERVICE_USER}
 WorkingDirectory=${service_working_dir}
+Environment=DOTNET_CLI_TELEMETRY_OPTOUT=1
+Environment=DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+Environment=DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 ExecStart=${service_exec_cmd}
 Restart=always
 RestartSec=10
