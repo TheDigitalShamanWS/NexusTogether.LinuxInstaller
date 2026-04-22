@@ -187,8 +187,8 @@ install_configs() {
     fi
     
     # Patcher configuration
-    if [[ -d "$PATCHER_DIR/Source/Nexus.Patch.Server/$build_path" ]]; then
-        cd "$PATCHER_DIR/Source/Nexus.Patch.Server/$build_path"
+    if [[ -d "$PATCHER_DIR/src/Nexus.Patch.Server/$build_path" ]]; then
+        cd "$PATCHER_DIR/src/Nexus.Patch.Server/$build_path"
         if [[ -f "appsettings.example.json" ]]; then
             if [[ -f "appsettings.json" ]]; then
                 print_status "Backing up existing appsettings.json..."
@@ -243,7 +243,7 @@ install_configs() {
         fi
         cd "$SERVER_DIR/Source"
     else
-        print_error "Patcher build directory not found: $PATCHER_DIR/Source/Nexus.Patch.Server/$build_path"
+        print_error "Patcher build directory not found: $PATCHER_DIR/src/Nexus.Patch.Server/$build_path"
     fi
     
     # Summary

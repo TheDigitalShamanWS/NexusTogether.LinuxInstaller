@@ -38,7 +38,7 @@ install_services() {
             
             # Special handling for patcher service
             if [[ "$service_key" == "patcher" ]]; then
-                service_working_dir="$PATCHER_DIR/Source/Nexus.Patch.Server/bin/$CONFIG_MODE/$FRAMEWORK_VERSION"
+                service_working_dir="$PATCHER_DIR/src/Nexus.Patch.Server/bin/$CONFIG_MODE/$FRAMEWORK_VERSION"
                 service_exec_cmd="/home/${SERVICE_USER}/.dotnet/dotnet ${service_name}.dll"
             fi
             
@@ -151,7 +151,7 @@ EOF
             
             # Special handling for patcher service
             if [[ "$service_key" == "patcher" ]]; then
-                service_path="$PATCHER_DIR/Source/Nexus.Patch.Server/bin/$CONFIG_MODE/$FRAMEWORK_VERSION"
+                service_path="$PATCHER_DIR/src/Nexus.Patch.Server/bin/$CONFIG_MODE/$FRAMEWORK_VERSION"
             fi
             
             # Copy wrapper script to services directory with service name
