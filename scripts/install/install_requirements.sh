@@ -36,17 +36,17 @@ install_requirements() {
         sudo -u "$SERVICE_USER" bash -c 'export DOTNET_CLI_TELEMETRY_OPTOUT=1 && export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version latest --channel 10.0'
         
         # Add .NET to PATH, disable telemetry permanently, and set invariant globalization
-        if ! sudo -u "$SERVICE_USER" grep -q 'export PATH=$PATH:$HOME/.dotnet' "/home/$SERVICE_USER/.bashrc"; then
-            sudo -u "$SERVICE_USER" bash -c 'echo "export PATH=\$PATH:\$HOME/.dotnet" >> /home/$SERVICE_USER/.bashrc'
+        if ! sudo -u "$SERVICE_USER" bash -c 'grep -q ".dotnet" ~/.bashrc'; then
+            sudo -u "$SERVICE_USER" bash -c 'echo "export PATH=\$PATH:\$HOME/.dotnet" >> ~/.bashrc'
         fi
-        if ! sudo -u "$SERVICE_USER" grep -q 'export DOTNET_CLI_TELEMETRY_OPTOUT=1' "/home/$SERVICE_USER/.bashrc"; then
-            sudo -u "$SERVICE_USER" bash -c 'echo "export DOTNET_CLI_TELEMETRY_OPTOUT=1" >> /home/$SERVICE_USER/.bashrc'
+        if ! sudo -u "$SERVICE_USER" bash -c 'grep -q "DOTNET_CLI_TELEMETRY_OPTOUT" ~/.bashrc'; then
+            sudo -u "$SERVICE_USER" bash -c 'echo "export DOTNET_CLI_TELEMETRY_OPTOUT=1" >> ~/.bashrc'
         fi
-        if ! sudo -u "$SERVICE_USER" grep -q 'export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1' "/home/$SERVICE_USER/.bashrc"; then
-            sudo -u "$SERVICE_USER" bash -c 'echo "export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1" >> /home/$SERVICE_USER/.bashrc'
+        if ! sudo -u "$SERVICE_USER" bash -c 'grep -q "DOTNET_SKIP_FIRST_TIME_EXPERIENCE" ~/.bashrc'; then
+            sudo -u "$SERVICE_USER" bash -c 'echo "export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1" >> ~/.bashrc'
         fi
-        if ! sudo -u "$SERVICE_USER" grep -q 'export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1' "/home/$SERVICE_USER/.bashrc"; then
-            sudo -u "$SERVICE_USER" bash -c 'echo "export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1" >> /home/$SERVICE_USER/.bashrc'
+        if ! sudo -u "$SERVICE_USER" bash -c 'grep -q "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT" ~/.bashrc'; then
+            sudo -u "$SERVICE_USER" bash -c 'echo "export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1" >> ~/.bashrc'
         fi
         
         if sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet && command -v dotnet' &> /dev/null; then
@@ -81,20 +81,21 @@ install_requirements() {
     print_status ".NET version: $(sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet && dotnet --version')"
     
     # Install Entity Framework CLI tool (locally for service user)
-    if ! sudo -u "$SERVICE_USER" bash -c 'command -v dotnet-ef' &> /dev/null; then
+    if ! sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet/tools && command -v dotnet-ef' &> /dev/null; then
         print_status "Installing Entity Framework CLI tool..."
         sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && dotnet tool install --global dotnet-ef'
         
         # Add dotnet tools to PATH for service user
-        if ! sudo -u "$SERVICE_USER" grep -q 'export PATH=$PATH:$HOME/.dotnet/tools' "/home/$SERVICE_USER/.bashrc"; then
-            sudo -u "$SERVICE_USER" bash -c 'echo "export PATH=\$PATH:\$HOME/.dotnet/tools" >> /home/$SERVICE_USER/.bashrc'
+        if ! sudo -u "$SERVICE_USER" bash -c 'grep -q ".dotnet/tools" ~/.bashrc'; then
+            sudo -u "$SERVICE_USER" bash -c 'echo "export PATH=\$PATH:\$HOME/.dotnet/tools" >> ~/.bashrc'
         fi
         
-        if ! sudo -u "$SERVICE_USER" bash -c 'command -v dotnet-ef' &> /dev/null; then
+        # Verify installation with proper PATH
+        if sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet/tools && command -v dotnet-ef' &> /dev/null; then
+            print_status "Entity Framework CLI tool installed successfully"
+        else
             print_error "Failed to install Entity Framework CLI tool"
             return 1
-        else
-            print_status "Entity Framework CLI tool installed successfully"
         fi
     else
         print_status "Entity Framework CLI tool already installed"
