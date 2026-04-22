@@ -187,64 +187,92 @@ install_configs() {
     fi
     
     # Patcher configuration
+    local patcher_build_dir=""
+    # Try framework-specific path first
     if [[ -d "$PATCHER_DIR/src/Nexus.Patch.Server/$build_path" ]]; then
-        cd "$PATCHER_DIR/src/Nexus.Patch.Server/$build_path"
-        if [[ -f "appsettings.example.json" ]]; then
-            if [[ -f "appsettings.json" ]]; then
-                print_status "Backing up existing appsettings.json..."
-                sudo cp appsettings.json "appsettings.json.backup.$(date +%Y%m%d_%H%M%S)"
-            fi
-            sudo cp appsettings.example.json appsettings.json
-            
-            # Update patcher configuration
-            print_status "Updating patcher configuration..."
-            
-            # Determine public URL if patcher is public
-            local final_url="$PATCHER_URL"
-            if [[ "$PATCHER_SERVER_PUBLIC" == "true" ]]; then
-                # Check if current URL is localhost and patcher is public
-                if [[ "$PATCHER_URL" == *"localhost"* || "$PATCHER_URL" == *"127.0.0.1"* ]]; then
-                    print_status "Patcher is public but URL is localhost - detecting public IP..."
-                    local public_ip=$(get_public_ip)
-                    if [[ -n "$public_ip" ]]; then
-                        final_url="http://$public_ip:$PATCHER_SERVER_PORT"
-                        print_status "Updated patcher URL to public: $final_url"
-                        
-                        # Update patcher.conf file with new URL
-                        update_patcher_config "PATCHER_URL" "$final_url"
-                    else
-                        print_warning "Could not detect public IP, keeping localhost URL"
-                        print_warning "Please manually update PATCHER_URL in configs/patcher.conf"
-                    fi
-                fi
-            fi
-            
-            # Update URL with final URL (public IP if detected)
-            sudo sed -i "s|\"Url\": \".*\"|\"Url\": \"$final_url\"|g" appsettings.json
-            print_status "Updated patcher URL: $final_url"
-            
-            # Update GameFiles path if PATCHER_GAME_FILES is set
-            if [[ -n "$PATCHER_GAME_FILES" ]]; then
-                sudo sed -i "s|\"GameFiles\": \".*\"|\"GameFiles\": \"$PATCHER_GAME_FILES\"|g" appsettings.json
-                print_status "Updated game files path: $PATCHER_GAME_FILES"
-            fi
-            
-            # Update Build number if PATCHER_BUILD is set
-            if [[ -n "$PATCHER_BUILD" ]]; then
-                sudo sed -i "s|\"Build\": [0-9]*|\"Build\": $PATCHER_BUILD|g" appsettings.json
-                print_status "Updated build number: $PATCHER_BUILD"
-            fi
-            
-            print_status "Patcher configuration copied and updated"
-            ((configs_updated++))
-        else
-            print_error "appsettings.example.json not found"
-            print_error "This indicates a build issue - please ensure patcher was built successfully"
-        fi
-        cd "$SERVER_DIR/Source"
+        patcher_build_dir="$PATCHER_DIR/src/Nexus.Patch.Server/$build_path"
+    # Fallback to just config mode (no framework folder)
+    elif [[ -d "$PATCHER_DIR/src/Nexus.Patch.Server/bin/$CONFIG_MODE" ]]; then
+        patcher_build_dir="$PATCHER_DIR/src/Nexus.Patch.Server/bin/$CONFIG_MODE"
+    # Fallback to source directory
     else
-        print_error "Patcher build directory not found: $PATCHER_DIR/src/Nexus.Patch.Server/$build_path"
+        patcher_build_dir="$PATCHER_DIR/src/Nexus.Patch.Server"
     fi
+    
+    cd "$patcher_build_dir"
+    
+    print_status "Using patcher build directory: $patcher_build_dir"
+    
+    # Check if appsettings.example.json exists in current directory
+    if [[ -f "appsettings.example.json" ]]; then
+        local config_source="appsettings.example.json"
+    # Fallback: use existing appsettings.json
+    elif [[ -f "appsettings.json" ]]; then
+        local config_source="existing"
+        print_status "Using existing appsettings.json"
+    else
+        print_warning "appsettings.json not found, creating default..."
+        # Create a default config
+        cat > appsettings.json << EOF
+{
+  "Url": "$PATCHER_URL",
+  "GameFiles": "",
+  "Build": 1
+}
+EOF
+        local config_source="created"
+    fi
+    
+    if [[ "$config_source" == "appsettings.example.json" ]]; then
+        if [[ -f "appsettings.json" ]]; then
+            print_status "Backing up existing appsettings.json..."
+            sudo cp appsettings.json "appsettings.json.backup.$(date +%Y%m%d_%H%M%S)"
+        fi
+        sudo cp "$config_source" appsettings.json
+    fi
+    
+    # Update patcher configuration
+    print_status "Updating patcher configuration..."
+    
+    # Determine public URL if patcher is public
+    local final_url="$PATCHER_URL"
+    if [[ "$PATCHER_SERVER_PUBLIC" == "true" ]]; then
+        # Check if current URL is localhost and patcher is public
+        if [[ "$PATCHER_URL" == *"localhost"* || "$PATCHER_URL" == *"127.0.0.1"* ]]; then
+            print_status "Patcher is public but URL is localhost - detecting public IP..."
+            local public_ip=$(get_public_ip)
+            if [[ -n "$public_ip" ]]; then
+                final_url="http://$public_ip:$PATCHER_SERVER_PORT"
+                print_status "Updated patcher URL to public: $final_url"
+                
+                # Update patcher.conf file with new URL
+                update_patcher_config "PATCHER_URL" "$final_url"
+            else
+                print_warning "Could not detect public IP, keeping localhost URL"
+                print_warning "Please manually update PATCHER_URL in configs/patcher.conf"
+            fi
+        fi
+    fi
+    
+    # Update URL with final URL (public IP if detected)
+    sudo sed -i "s|\"Url\": \".*\"|\"Url\": \"$final_url\"|g" appsettings.json
+    print_status "Updated patcher URL: $final_url"
+    
+    # Update GameFiles path if PATCHER_GAME_FILES is set
+    if [[ -n "$PATCHER_GAME_FILES" ]]; then
+        sudo sed -i "s|\"GameFiles\": \".*\"|\"GameFiles\": \"$PATCHER_GAME_FILES\"|g" appsettings.json
+        print_status "Updated game files path: $PATCHER_GAME_FILES"
+    fi
+    
+    # Update Build number if PATCHER_BUILD is set
+    if [[ -n "$PATCHER_BUILD" ]]; then
+        sudo sed -i "s|\"Build\": [0-9]*|\"Build\": $PATCHER_BUILD|g" appsettings.json
+        print_status "Updated build number: $PATCHER_BUILD"
+    fi
+    
+    print_status "Patcher configuration copied and updated"
+    ((configs_updated++))
+    cd "$SERVER_DIR/Source"
     
     # Summary
     if [[ $configs_updated -gt 0 ]]; then

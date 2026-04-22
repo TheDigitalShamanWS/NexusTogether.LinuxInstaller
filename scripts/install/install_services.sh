@@ -38,7 +38,16 @@ install_services() {
             
             # Special handling for patcher service
             if [[ "$service_key" == "patcher" ]]; then
-                service_working_dir="$PATCHER_DIR/src/Nexus.Patch.Server/bin/$CONFIG_MODE/$FRAMEWORK_VERSION"
+                # Try framework-specific path first
+                if [[ -d "$PATCHER_DIR/src/Nexus.Patch.Server/bin/$CONFIG_MODE/$FRAMEWORK_VERSION" ]]; then
+                    service_working_dir="$PATCHER_DIR/src/Nexus.Patch.Server/bin/$CONFIG_MODE/$FRAMEWORK_VERSION"
+                # Fallback to just config mode
+                elif [[ -d "$PATCHER_DIR/src/Nexus.Patch.Server/bin/$CONFIG_MODE" ]]; then
+                    service_working_dir="$PATCHER_DIR/src/Nexus.Patch.Server/bin/$CONFIG_MODE"
+                # Fallback to source directory
+                else
+                    service_working_dir="$PATCHER_DIR/src/Nexus.Patch.Server"
+                fi
                 service_exec_cmd="/home/${SERVICE_USER}/.dotnet/dotnet ${service_name}.dll"
             fi
             
@@ -151,7 +160,16 @@ EOF
             
             # Special handling for patcher service
             if [[ "$service_key" == "patcher" ]]; then
-                service_path="$PATCHER_DIR/src/Nexus.Patch.Server/bin/$CONFIG_MODE/$FRAMEWORK_VERSION"
+                # Try framework-specific path first
+                if [[ -d "$PATCHER_DIR/src/Nexus.Patch.Server/bin/$CONFIG_MODE/$FRAMEWORK_VERSION" ]]; then
+                    service_path="$PATCHER_DIR/src/Nexus.Patch.Server/bin/$CONFIG_MODE/$FRAMEWORK_VERSION"
+                # Fallback to just config mode
+                elif [[ -d "$PATCHER_DIR/src/Nexus.Patch.Server/bin/$CONFIG_MODE" ]]; then
+                    service_path="$PATCHER_DIR/src/Nexus.Patch.Server/bin/$CONFIG_MODE"
+                # Fallback to source directory
+                else
+                    service_path="$PATCHER_DIR/src/Nexus.Patch.Server"
+                fi
             fi
             
             # Copy wrapper script to services directory with service name
