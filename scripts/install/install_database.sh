@@ -74,7 +74,7 @@ install_database() {
     
     # Step 2: Verify dotnet-ef tool is available (installed in requirements)
     print_status "Verifying dotnet-ef tool..."
-    if ! sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet/tools && export DOTNET_ROOT=$HOME/.dotnet && command -v dotnet-ef' &> /dev/null; then
+    if ! sudo -u "$SERVICE_USER" bash -c 'export PATH=$HOME/.dotnet:$HOME/.dotnet/tools:$PATH && export DOTNET_ROOT=$HOME/.dotnet && command -v dotnet-ef' &> /dev/null; then
         print_error "dotnet-ef tool not found. Please run requirements installation first."
         return 1
     fi
@@ -85,21 +85,21 @@ install_database() {
     
     # WorldServer migrations
     print_status "Running WorldServer migrations..."
-    if sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet/tools && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$SERVER_DIR/Source/NexusForever.WorldServer' && dotnet-ef database update --context AuthContext --configuration $CONFIG_MODE"; then
+    if sudo -u "$SERVICE_USER" bash -c "export PATH=\$HOME/.dotnet:\$HOME/.dotnet/tools:\$PATH && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$SERVER_DIR/Source/NexusForever.WorldServer' && dotnet-ef database update --context AuthContext --configuration $CONFIG_MODE"; then
         print_status "AuthContext migrations completed successfully"
     else
         print_error "AuthContext migrations failed"
         return 1
     fi
 
-    if sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet/tools && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$SERVER_DIR/Source/NexusForever.WorldServer' && dotnet-ef database update --context CharacterContext --configuration $CONFIG_MODE"; then
+    if sudo -u "$SERVICE_USER" bash -c "export PATH=\$HOME/.dotnet:\$HOME/.dotnet/tools:\$PATH && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$SERVER_DIR/Source/NexusForever.WorldServer' && dotnet-ef database update --context CharacterContext --configuration $CONFIG_MODE"; then
         print_status "CharacterContext migrations completed successfully"
     else
         print_error "CharacterContext migrations failed"
         return 1
     fi
 
-    if sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet/tools && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$SERVER_DIR/Source/NexusForever.WorldServer' && dotnet-ef database update --context WorldContext --configuration $CONFIG_MODE"; then
+    if sudo -u "$SERVICE_USER" bash -c "export PATH=\$HOME/.dotnet:\$HOME/.dotnet/tools:\$PATH && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$SERVER_DIR/Source/NexusForever.WorldServer' && dotnet-ef database update --context WorldContext --configuration $CONFIG_MODE"; then
         print_status "WorldContext migrations completed successfully"
     else
         print_error "WorldContext migrations failed"
@@ -108,7 +108,7 @@ install_database() {
     
     # ChatServer migrations
     print_status "Running ChatServer migrations..."
-    if sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet/tools && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$SERVER_DIR/Source/NexusForever.Server.ChatServer' && dotnet-ef database update --configuration $CONFIG_MODE"; then
+    if sudo -u "$SERVICE_USER" bash -c "export PATH=\$HOME/.dotnet:\$HOME/.dotnet/tools:\$PATH && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$SERVER_DIR/Source/NexusForever.Server.ChatServer' && dotnet-ef database update --configuration $CONFIG_MODE"; then
         print_status "ChatServer migrations completed successfully"
     else
         print_error "ChatServer migrations failed"
@@ -117,7 +117,7 @@ install_database() {
     
     # GroupServer migrations
     print_status "Running GroupServer migrations..."
-    if sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet/tools && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$SERVER_DIR/Source/NexusForever.Server.GroupServer' && dotnet-ef database update --configuration $CONFIG_MODE"; then
+    if sudo -u "$SERVICE_USER" bash -c "export PATH=\$HOME/.dotnet:\$HOME/.dotnet/tools:\$PATH && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$SERVER_DIR/Source/NexusForever.Server.GroupServer' && dotnet-ef database update --configuration $CONFIG_MODE"; then
         print_status "GroupServer migrations completed successfully"
     else
         print_error "GroupServer migrations failed"
