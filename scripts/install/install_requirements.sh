@@ -28,39 +28,28 @@ install_requirements() {
     fi
     
     # Check if .NET is installed
-    if ! command -v dotnet &> /dev/null; then
+    if ! sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet && command -v dotnet' &> /dev/null; then
         print_status ".NET is not installed. Installing .NET 10.0 SDK..."
         print_status "This may take a few minutes..."
         
-        # Disable .NET telemetry and set invariant globalization
-        export DOTNET_CLI_TELEMETRY_OPTOUT=1
-        export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-        export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
-        
-        # Install .NET 10.0 SDK using Microsoft's official script
-        curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version latest --channel 10.0
+        # Install .NET 10.0 SDK using Microsoft's official script as service user
+        sudo -u "$SERVICE_USER" bash -c 'export DOTNET_CLI_TELEMETRY_OPTOUT=1 && export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version latest --channel 10.0'
         
         # Add .NET to PATH, disable telemetry permanently, and set invariant globalization
-        if ! grep -q 'export PATH=$PATH:$HOME/.dotnet' "/home/$SERVICE_USER/.bashrc"; then
-            echo 'export PATH=$PATH:$HOME/.dotnet' >> "/home/$SERVICE_USER/.bashrc"
+        if ! sudo -u "$SERVICE_USER" grep -q 'export PATH=$PATH:$HOME/.dotnet' "/home/$SERVICE_USER/.bashrc"; then
+            sudo -u "$SERVICE_USER" bash -c 'echo "export PATH=\$PATH:\$HOME/.dotnet" >> /home/$SERVICE_USER/.bashrc'
         fi
-        if ! grep -q 'export DOTNET_CLI_TELEMETRY_OPTOUT=1' "/home/$SERVICE_USER/.bashrc"; then
-            echo 'export DOTNET_CLI_TELEMETRY_OPTOUT=1' >> "/home/$SERVICE_USER/.bashrc"
+        if ! sudo -u "$SERVICE_USER" grep -q 'export DOTNET_CLI_TELEMETRY_OPTOUT=1' "/home/$SERVICE_USER/.bashrc"; then
+            sudo -u "$SERVICE_USER" bash -c 'echo "export DOTNET_CLI_TELEMETRY_OPTOUT=1" >> /home/$SERVICE_USER/.bashrc'
         fi
-        if ! grep -q 'export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1' "/home/$SERVICE_USER/.bashrc"; then
-            echo 'export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1' >> "/home/$SERVICE_USER/.bashrc"
+        if ! sudo -u "$SERVICE_USER" grep -q 'export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1' "/home/$SERVICE_USER/.bashrc"; then
+            sudo -u "$SERVICE_USER" bash -c 'echo "export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1" >> /home/$SERVICE_USER/.bashrc'
         fi
-        if ! grep -q 'export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1' "/home/$SERVICE_USER/.bashrc"; then
-            echo 'export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1' >> "/home/$SERVICE_USER/.bashrc"
+        if ! sudo -u "$SERVICE_USER" grep -q 'export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1' "/home/$SERVICE_USER/.bashrc"; then
+            sudo -u "$SERVICE_USER" bash -c 'echo "export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1" >> /home/$SERVICE_USER/.bashrc'
         fi
         
-        # Set up environment for current session
-        export PATH=$PATH:$HOME/.dotnet
-        export DOTNET_CLI_TELEMETRY_OPTOUT=1
-        export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-        export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
-        
-        if command -v dotnet &> /dev/null; then
+        if sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet && command -v dotnet' &> /dev/null; then
             print_status ".NET 10.0 SDK installed successfully"
         else
             print_error "Failed to install .NET 10.0 SDK"
@@ -82,21 +71,26 @@ install_requirements() {
     fi
     
     # Check .NET version
-    local dotnet_version=$(dotnet --version | cut -d. -f1)
+    local dotnet_version=$(sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet && dotnet --version' | cut -d. -f1)
     if [[ $dotnet_version -lt 10 ]]; then
-        print_error ".NET 10.0 SDK is required. Current version: $(dotnet --version)"
+        print_error ".NET 10.0 SDK is required. Current version: $(sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet && dotnet --version')"
         print_status "Please upgrade your .NET installation"
         return 1
     fi
     
-    print_status ".NET version: $(dotnet --version)"
+    print_status ".NET version: $(sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet && dotnet --version')"
     
-    # Install Entity Framework CLI tool (globally as per wiki)
-    if ! command -v dotnet-ef &> /dev/null; then
-        print_status "Installing Entity Framework CLI tool globally..."
-        sudo dotnet tool install dotnet-ef --tool-path /usr/bin
+    # Install Entity Framework CLI tool (locally for service user)
+    if ! sudo -u "$SERVICE_USER" bash -c 'command -v dotnet-ef' &> /dev/null; then
+        print_status "Installing Entity Framework CLI tool..."
+        sudo -u "$SERVICE_USER" bash -c 'export PATH=$PATH:$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && dotnet tool install --global dotnet-ef'
         
-        if ! command -v dotnet-ef &> /dev/null; then
+        # Add dotnet tools to PATH for service user
+        if ! sudo -u "$SERVICE_USER" grep -q 'export PATH=$PATH:$HOME/.dotnet/tools' "/home/$SERVICE_USER/.bashrc"; then
+            sudo -u "$SERVICE_USER" bash -c 'echo "export PATH=\$PATH:\$HOME/.dotnet/tools" >> /home/$SERVICE_USER/.bashrc'
+        fi
+        
+        if ! sudo -u "$SERVICE_USER" bash -c 'command -v dotnet-ef' &> /dev/null; then
             print_error "Failed to install Entity Framework CLI tool"
             return 1
         else
