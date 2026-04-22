@@ -91,6 +91,30 @@ install_mariadb() {
     # Create remote user if enabled
     if [[ "$REMOTE_ACCESS_ENABLED" == "true" ]]; then
         print_status "Setting up remote database access..."
+        
+        # Configure MariaDB to listen on all interfaces
+        local mariadb_conf="/etc/mysql/mariadb.conf.d/50-server.cnf"
+        if [[ -f "$mariadb_conf" ]]; then
+            print_status "Configuring MariaDB to listen on all interfaces..."
+            # Backup the config file
+            sudo cp "$mariadb_conf" "${mariadb_conf}.backup.$(date +%Y%m%d_%H%M%S)"
+            
+            # Change bind-address from 127.0.0.1 to 0.0.0.0
+            if sudo sed -i 's/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/' "$mariadb_conf"; then
+                print_status "MariaDB bind-address updated to 0.0.0.0"
+            else
+                print_warning "Could not update bind-address, may already be configured"
+            fi
+            
+            # Restart MariaDB to apply changes
+            print_status "Restarting MariaDB to apply bind-address changes..."
+            sudo systemctl restart mariadb
+            sleep 2
+        else
+            print_warning "MariaDB config file not found at $mariadb_conf"
+            print_warning "Please manually configure bind-address to 0.0.0.0"
+        fi
+        
         if sudo mysql -e "SELECT User FROM mysql.user WHERE User = '$REMOTE_DB_USER';" 2>/dev/null | grep -q "$REMOTE_DB_USER"; then
             print_status "Remote user '$REMOTE_DB_USER' already exists, updating password..."
             if sudo mysql -e "ALTER USER '$REMOTE_DB_USER'@'$REMOTE_ACCESS_HOST' IDENTIFIED BY '$REMOTE_DB_PASS';" 2>/dev/null; then
