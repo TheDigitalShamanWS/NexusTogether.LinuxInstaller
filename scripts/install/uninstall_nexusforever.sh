@@ -290,7 +290,7 @@ remove_systemd_services() {
 
 remove_firewall_rules() {
     # Remove UFW rules for all NexusForever ports
-    local ports=("$AUTH_SERVER_PORT" "$WORLD_SERVER_PORT" "$API_SERVER_PORT" "$CHAT_SERVER_PORT" "$GROUP_SERVER_PORT" "$PATCHER_SERVER_PORT")
+    local ports=("$AUTH_SERVER_PORT" "$WORLD_SERVER_PORT" "$API_SERVER_PORT" "$PATCHER_SERVER_PORT")
     
     for port in "${ports[@]}"; do
         if sudo ufw status | grep -q "$port"; then
