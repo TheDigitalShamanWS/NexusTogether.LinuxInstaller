@@ -292,6 +292,11 @@ remove_firewall_rules() {
     # Remove UFW rules for all NexusForever ports
     local ports=("$AUTH_SERVER_PORT" "$WORLD_SERVER_PORT" "$API_SERVER_PORT" "$PATCHER_SERVER_PORT")
     
+    # Also remove database port if it was opened
+    if [[ "$REMOTE_ACCESS_ENABLED" == "true" ]]; then
+        ports+=("$DB_PORT")
+    fi
+    
     for port in "${ports[@]}"; do
         if sudo ufw status | grep -q "$port"; then
             sudo ufw delete allow "$port/tcp" 2>/dev/null

@@ -59,6 +59,13 @@ install_firewall() {
         public_ports+=("$PATCHER_SERVER_PORT")
     fi
     
+    # Add database port if remote access is enabled
+    if [[ "$REMOTE_ACCESS_ENABLED" == "true" ]]; then
+        ports+=("$DB_PORT")
+        public_ports+=("$DB_PORT")
+        print_status "Remote database access enabled - adding DB port $DB_PORT to firewall"
+    fi
+    
     local rules_updated=0
     local rules_added=0
     local rules_removed=0
@@ -153,6 +160,15 @@ install_firewall() {
         echo -e "${GREEN}✓ OPEN${NC} - Patcher Server port $PATCHER_SERVER_PORT is allowed in UFW"
     else
         echo -e "${RED}✗ CLOSED${NC} - Patcher Server port $PATCHER_SERVER_PORT is not allowed in UFW"
+    fi
+    
+    # Check database port status if remote access is enabled
+    if [[ "$REMOTE_ACCESS_ENABLED" == "true" ]]; then
+        if sudo ufw status verbose | grep -q "$DB_PORT.*ALLOW.*Anywhere"; then
+            echo -e "${GREEN}✓ OPEN${NC} - Database port $DB_PORT is allowed in UFW (remote access)"
+        else
+            echo -e "${RED}✗ CLOSED${NC} - Database port $DB_PORT is not allowed in UFW (remote access enabled but port closed)"
+        fi
     fi
     
     echo ""
