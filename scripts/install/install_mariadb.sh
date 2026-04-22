@@ -135,9 +135,9 @@ install_mariadb() {
             fi
         fi
         
-        # Grant privileges to remote user
-        if sudo mysql -e "GRANT ALL PRIVILEGES ON nexusforever.* TO '$REMOTE_DB_USER'@'$REMOTE_ACCESS_HOST';" 2>/dev/null; then
-            print_status "Remote database privileges granted successfully"
+        # Grant privileges to remote user (all databases for root-like access)
+        if sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO '$REMOTE_DB_USER'@'$REMOTE_ACCESS_HOST' WITH GRANT OPTION;" 2>/dev/null; then
+            print_status "Remote database privileges granted successfully (all databases with GRANT OPTION)"
         else
             print_error "Failed to grant remote database privileges"
             return 1
