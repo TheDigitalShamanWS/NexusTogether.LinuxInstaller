@@ -20,19 +20,27 @@ install_requirements() {
         sudo chown -R "$SERVICE_USER:$SERVICE_USER" "/home/$SERVICE_USER/.local"
     fi
     
+    # Install ICU library for .NET globalization support
+    if ! dpkg -l | grep -q libicu; then
+        print_status "Installing ICU library for .NET globalization support..."
+        sudo apt update
+        sudo apt install -y libicu-dev
+    fi
+    
     # Check if .NET is installed
     if ! command -v dotnet &> /dev/null; then
         print_status ".NET is not installed. Installing .NET 10.0 SDK..."
         print_status "This may take a few minutes..."
         
-        # Disable .NET telemetry
+        # Disable .NET telemetry and set invariant globalization
         export DOTNET_CLI_TELEMETRY_OPTOUT=1
         export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+        export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
         
         # Install .NET 10.0 SDK using Microsoft's official script
         curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version latest --channel 10.0
         
-        # Add .NET to PATH and disable telemetry permanently
+        # Add .NET to PATH, disable telemetry permanently, and set invariant globalization
         if ! grep -q 'export PATH=$PATH:$HOME/.dotnet' "/home/$SERVICE_USER/.bashrc"; then
             echo 'export PATH=$PATH:$HOME/.dotnet' >> "/home/$SERVICE_USER/.bashrc"
         fi
@@ -42,11 +50,15 @@ install_requirements() {
         if ! grep -q 'export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1' "/home/$SERVICE_USER/.bashrc"; then
             echo 'export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1' >> "/home/$SERVICE_USER/.bashrc"
         fi
+        if ! grep -q 'export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1' "/home/$SERVICE_USER/.bashrc"; then
+            echo 'export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1' >> "/home/$SERVICE_USER/.bashrc"
+        fi
         
         # Set up environment for current session
         export PATH=$PATH:$HOME/.dotnet
         export DOTNET_CLI_TELEMETRY_OPTOUT=1
         export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+        export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
         
         if command -v dotnet &> /dev/null; then
             print_status ".NET 10.0 SDK installed successfully"
