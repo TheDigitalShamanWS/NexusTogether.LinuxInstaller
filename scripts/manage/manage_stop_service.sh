@@ -15,10 +15,6 @@ manage_stop_service() {
             if [[ "$SERVICE_MODE" == "screen" ]]; then
                 # Stop screen session
                 if screen -list | grep -q "nexus-$service_key"; then
-                    screen -S "nexus-$service_key" -p 0 -X stuff "^C"  # Send Ctrl+C
-                    sleep 2
-                    screen -S "nexus-$service_key" -p 0 -X stuff "exit^M"  # Send exit
-                    sleep 1
                     screen -S "nexus-$service_key" -X quit  # Force quit screen
                     print_status "$display_name screen session stopped"
                     ((stopped_count++))
@@ -44,10 +40,6 @@ manage_stop_service() {
             if [[ "$service_key" == "$service_choice" ]]; then
                 if [[ "$SERVICE_MODE" == "screen" ]]; then
                     if screen -list | grep -q "nexus-$service_key"; then
-                        screen -S "nexus-$service_key" -p 0 -X stuff "^C"
-                        sleep 2
-                        screen -S "nexus-$service_key" -p 0 -X stuff "exit^M"
-                        sleep 1
                         screen -S "nexus-$service_key" -X quit
                         print_status "$display_name screen session stopped"
                     else
