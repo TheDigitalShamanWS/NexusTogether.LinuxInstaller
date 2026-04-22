@@ -31,8 +31,7 @@ manage_command_menu() {
         read -p "Enter your choice [1-$index, q]: " choice
         
         if [[ "$choice" == "q" ]]; then
-            print_status "Goodbye!"
-            exit 0
+            break
         elif [[ "$choice" == "$index" ]]; then
             break
         elif [[ "$choice" =~ ^[0-9]+$ ]] && [[ "$choice" -ge 1 ]] && [[ "$choice" -lt "$index" ]]; then

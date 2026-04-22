@@ -176,8 +176,7 @@ manage_service_config() {
                 break
                 ;;
             q|Q)
-                print_status "Goodbye!"
-                exit 0
+                break
                 ;;
             *)
                 print_error "Invalid choice"
@@ -227,8 +226,7 @@ menu_network_config() {
                 break
                 ;;
             q|Q)
-                print_status "Goodbye!"
-                exit 0
+                break
                 ;;
             *)
                 print_error "Invalid choice"
@@ -315,8 +313,7 @@ menu_database_config() {
                 break
                 ;;
             q|Q)
-                print_status "Goodbye!"
-                exit 0
+                break
                 ;;
             *)
                 print_error "Invalid choice"
@@ -400,8 +397,7 @@ menu_broker_config() {
                 break
                 ;;
             q|Q)
-                print_status "Goodbye!"
-                exit 0
+                break
                 ;;
             *)
                 print_error "Invalid choice"
