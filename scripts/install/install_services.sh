@@ -53,6 +53,7 @@ Type=simple
 User=${SERVICE_USER}
 Group=${SERVICE_USER}
 WorkingDirectory=${service_working_dir}
+Environment=DOTNET_ROOT=/home/${SERVICE_USER}/.dotnet
 Environment=DOTNET_CLI_TELEMETRY_OPTOUT=1
 Environment=DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 Environment=DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1

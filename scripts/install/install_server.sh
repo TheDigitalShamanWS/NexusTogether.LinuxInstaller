@@ -182,22 +182,22 @@ install_server() {
         
         # Clean obj directories to fix target framework issues
         print_status "Cleaning previous build artifacts..."
-        if ! sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$PATCHER_DIR' && dotnet clean '$solution_file'"; then
+        if ! sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$PATCHER_DIR' && dotnet clean '$solution_file'"; then
             print_warning "Clean failed, continuing anyway..."
         fi
         
         # Restore dependencies first (required for net10.0 targets)
         print_status "Restoring NuGet packages..."
-        if ! sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$PATCHER_DIR' && dotnet restore '$solution_file'"; then
+        if ! sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$PATCHER_DIR' && dotnet restore '$solution_file'"; then
             print_error "Failed to restore NuGet packages"
             return 1
         fi
         
         # Build the solution (now targeting net10.0)
         if [[ "$CONFIG_MODE" == "Release" ]]; then
-            build_cmd="sudo -u \"$SERVICE_USER\" bash -c \"export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$PATCHER_DIR' && dotnet publish \"$solution_file\" -c $CONFIG_MODE --framework $FRAMEWORK_VERSION\""
+            build_cmd="sudo -u \"$SERVICE_USER\" bash -c \"export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$PATCHER_DIR' && dotnet publish \"$solution_file\" -c $CONFIG_MODE --framework $FRAMEWORK_VERSION\""
         else
-            build_cmd="sudo -u \"$SERVICE_USER\" bash -c \"export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$PATCHER_DIR' && dotnet build \"$solution_file\" -c $CONFIG_MODE --framework $FRAMEWORK_VERSION\""
+            build_cmd="sudo -u \"$SERVICE_USER\" bash -c \"export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$PATCHER_DIR' && dotnet build \"$solution_file\" -c $CONFIG_MODE --framework $FRAMEWORK_VERSION\""
         fi
         
         if ! eval "$build_cmd"; then
@@ -238,7 +238,7 @@ install_server() {
     fi
     
     print_status "Building NexusForever server in $CONFIG_MODE mode..."
-    if sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$SERVER_DIR/Source' && dotnet build NexusForever.slnx -c '$CONFIG_MODE' --framework '$FRAMEWORK_VERSION'"; then
+    if sudo -u "$SERVICE_USER" bash -c "export PATH=\$PATH:\$HOME/.dotnet && export DOTNET_ROOT=\$HOME/.dotnet && export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 && cd '$SERVER_DIR/Source' && dotnet build NexusForever.slnx -c '$CONFIG_MODE' --framework '$FRAMEWORK_VERSION'"; then
         print_status "Server built successfully in $CONFIG_MODE mode"
         print_status "Framework: $FRAMEWORK_VERSION"
     else

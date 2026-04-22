@@ -39,6 +39,9 @@ install_requirements() {
         if ! sudo -u "$SERVICE_USER" bash -c 'grep -q ".dotnet" ~/.bashrc'; then
             sudo -u "$SERVICE_USER" bash -c 'echo "export PATH=\$PATH:\$HOME/.dotnet" >> ~/.bashrc'
         fi
+        if ! sudo -u "$SERVICE_USER" bash -c 'grep -q "DOTNET_ROOT" ~/.bashrc'; then
+            sudo -u "$SERVICE_USER" bash -c 'echo "export DOTNET_ROOT=\$HOME/.dotnet" >> ~/.bashrc'
+        fi
         if ! sudo -u "$SERVICE_USER" bash -c 'grep -q "DOTNET_CLI_TELEMETRY_OPTOUT" ~/.bashrc'; then
             sudo -u "$SERVICE_USER" bash -c 'echo "export DOTNET_CLI_TELEMETRY_OPTOUT=1" >> ~/.bashrc'
         fi
