@@ -8,7 +8,7 @@ menu_install() {
         echo ""
         
         print_menu_box "🚀 INSTALLATION OPTIONS"
-        print_menu_option "1" "🚀" "Complete Installation (All Components)"
+        print_menu_option "1" "✨" "Complete Installation (All Components)"
         print_menu_option "2" "🔧" "Manual Installation (Choose Components)"
         print_menu_option "3" "🗑️" "Uninstall NexusForever"
         print_menu_footer
