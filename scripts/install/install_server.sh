@@ -13,27 +13,42 @@ install_server() {
         # Check if server directory already exists
         if [[ -d "$SERVER_DIR" ]]; then
             print_status "Server directory exists: $SERVER_DIR"
-            print_status "Updating existing repository..."
             cd "$SERVER_DIR"
             
             # Check if we're in a git repository
             if [[ -d ".git" ]]; then
-                print_status "Fetching latest changes from $SERVER_BRANCH..."
-                git fetch origin
+                # Get the current remote URL
+                local current_url=$(git config --get remote.origin.url)
                 
-                # Check if there are changes to pull
-                if git rev-parse HEAD != git rev-parse origin/$SERVER_BRANCH 2>/dev/null; then
-                    print_status "Pulling latest changes..."
-                    git pull origin "$SERVER_BRANCH"
-                    local action_taken="updated"
+                # Check if the URL matches the configured one
+                if [[ "$current_url" != "$SERVER_REPO_URL" ]]; then
+                    print_warning "Repository URL mismatch detected"
+                    print_warning "Current URL: $current_url"
+                    print_warning "Configured URL: $SERVER_REPO_URL"
+                    print_status "Removing old repository and installing from new URL..."
+                    
+                    cd "$SERVER_DIR/.."
+                    rm -rf "$SERVER_DIR"
+                    local action_taken="fresh_install"
                 else
-                    print_status "Repository is already up to date"
-                    local action_taken="checked"
+                    print_status "Updating existing repository..."
+                    print_status "Fetching latest changes from $SERVER_BRANCH..."
+                    git fetch origin
+                    
+                    # Check if there are changes to pull
+                    if git rev-parse HEAD != git rev-parse origin/$SERVER_BRANCH 2>/dev/null; then
+                        print_status "Pulling latest changes..."
+                        git pull origin "$SERVER_BRANCH"
+                        local action_taken="updated"
+                    else
+                        print_status "Repository is already up to date"
+                        local action_taken="checked"
+                    fi
+                    
+                    print_status "Updating submodules..."
+                    git submodule update --init --recursive
+                    print_status "Submodules updated"
                 fi
-                
-                print_status "Updating submodules..."
-                git submodule update --init --recursive
-                print_status "Submodules updated"
             else
                 print_error "Directory exists but is not a git repository"
                 print_error "Cannot update - please remove directory manually and retry"
